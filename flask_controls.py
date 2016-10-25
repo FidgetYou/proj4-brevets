@@ -62,13 +62,30 @@ def _calc_times():
   described at https://rusa.org/octime_alg.html.
   Expects one URL-encoded argument, the number of miles. 
   """
-  app.logger.debug("Got a JSON request");
-  km = request.args.get('km', 0, type=int)
+  app.logger.debug("Got a JSON request")
+
+  km = request.args.get('km', 0, type=float)
+  app.logger.debug("km = " + str(km))
+  
+  dis = request.args.get('dist', "0", type=int)
+  app.logger.debug("distance = " + str(dis))
+
+  #dateOne = request.args.get('begin_date_field', "0", type=str)
+  #timeOne = request.args.get('begin_time_field', "0", type=str)
+  #datery = "" + dateOne + " " + timeOne + ""
   #FIXME: These probably aren't the right open and close times
-  open_time = acp_times.open_time(km, 200, arrow.now().isoformat)
-  close_time = acp_times.close_time(km, 200, arrow.now().isoformat)
-  result={ "open": open_time, "close": close_time }
+  err_note = ""
+
+  if km > (dis * 1.2):
+     err_note = "Brevet too long"
+  #FIXME: OTher checks go here
+
+  open_time = acp_times.open_time(km, dis, arrow.now())
+  close_time = acp_times.close_time(km, dis, arrow.now())
+  
+  result={ "open": open_time, "close": close_time, "note": err_note}
   return jsonify(result=result)
+
 
 
 #############
