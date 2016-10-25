@@ -70,7 +70,7 @@
     <input type=time name="begin_time" id="begin_time" value="00:00"    />
   </div> <!-- columns 5-10 -->
   </div> <!-- row -->
-
+  <p id="response"> </p>  <!-- JavaScript will insert text here -->
   <br />  <!-- Cosmetic -- a little vertical space -->
   <!-- Although we do not use tables for general page layout, they are
        appropriate for something that really is a table, like this
@@ -104,7 +104,8 @@
       <!-- Close time (read only, set by JavaScript function -->
       <td><input name="close" type="datetime" value="" readonly /></td>
       <!-- Notes (error messages for this row) -->
-      <td class="notes"> &nbsp; </td>
+      
+      <td class="notes" name="notes" value="" > &nbsp; </td>
     </tr>
     {% endfor %}
   </table>
@@ -124,10 +125,15 @@
   // stash them in hidden fields.) 
   function calc_times(control) {
     var km = control.find("input[name='km']").val();
+    var dist = $("#brevet_dist_km").val();
     var open_time_field = control.find("input[name='open']");
     var close_time_field = control.find("input[name='close']");
-    
-    $.getJSON(TIME_CALC_URL, { km: km }, 
+    //var noted = control.find("input[class='notes']");
+    console.log("Got a distance: " +  dist);
+    console.log("Got a date: " +  begin_date_field);
+    console.log("Got a time: " +  begin_time_field);
+
+    $.getJSON(TIME_CALC_URL, { km: km, dist : dist }, 
       // response handler
       function(data) {
          var times = data.result;
@@ -135,6 +141,9 @@
          console.log("Response.open = " + times.open);
          open_time_field.val( moment(times.open).format("ddd M/D H:mm"));
          close_time_field.val( moment(times.close).format("ddd M/D H:mm"));
+ 	 $("#notes").val("nope");
+         //noted = data.result.note;
+	 //$("#responce").append(" " + noted);
        } // end of handler function
      );// End of getJSON
     }
@@ -150,8 +159,10 @@
              var control_entry = $(this).parents(".control")
              var target = control_entry.find("input[name='km']");
              target.val( km );
+	     //var note = dist;
              // Then calculate times for this entry
              calc_times(control_entry);
+	     
           });
 
       $('input[name="km"]').change(
@@ -162,9 +173,12 @@
              var control_entry = $(this).parents(".control")
              var target = control_entry.find("input[name='miles']");
              target.val( miles );
+	     //var note = dist;
              // Then calculate times for this entry
+	     //$("#notes").val("Test");
              calc_times(control_entry);
           });
+
 
      });   // end of what we do on document ready
 
